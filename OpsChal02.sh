@@ -20,6 +20,8 @@ var5=$(date)
 
 #creating function faketimer to simulate loading progress
 faketimer () {
+    echo "preparing system logs..."
+    sleep 1 
     #setting while loop to analyze whether var3's value is less than 5
     while [ $var3 -lt 5 ]
     do
@@ -30,6 +32,8 @@ faketimer () {
         #add 1 to the value of var3
         var3=$((var3 + 1 ))
     done
+    echo "checking to ensure positive transfer..."
+    sleep 2
     #print statement acknowledging completion of the task
     echo "finished!"
 }
