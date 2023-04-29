@@ -8,7 +8,7 @@
 #Prompts user for input permissions number (e.g. 777 to perform a chmod 777)
 #Navigates to directory input by user and changes all files inside it to input setting.
 #Prints to screen directory contents and new permissions settings of everything in directory.
-
+#variables: var1, storing input of directory/filepath. var2, storing permissions number. var3, storing log filename and path.
 
 #MAIN
 echo "welcome to the extremely dangerous file permission changer!" 
