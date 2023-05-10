@@ -21,8 +21,13 @@ print(iam)
 print(myip)
 print(hrdwr)
 
-
+#setting list "todo" to hold different commands which are to be done
 todo = ["whoami", "ip a", "lshw -short"]
+#for each thing in the list
 for x in todo:
+    #runs the command in question with subprocess.check_output(), shell = True indicates the command should be ran in the shell
+    #universal_newlines = True tells check_output to return the value as a string instead of bytes. stores this value in the variable "done" 
     done = subprocess.check_output( x, shell = True, universal_newlines = True)
+    #echos the end result to the terminal
     print(done) 
+    
