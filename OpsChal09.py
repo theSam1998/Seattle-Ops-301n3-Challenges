@@ -12,8 +12,8 @@
 #!Create an if statement that includes both elif and else to execute when both if and elif are not met.
 #Stretch Goals (Optional Objectives)
 #Pursue stretch goals if you are a more advanced user or have remaining lab time.
-#Create an if statement with two conditions by using and between conditions.
-#Create an if statement with two conditions by using or between conditions.
+#!Create an if statement with two conditions by using and between conditions.
+#!Create an if statement with two conditions by using or between conditions.
 #Create a nested if statement.
 #Create an if statement that includes pass to avoid errors.
 
@@ -27,12 +27,15 @@ def sit_finder(sit):
 
     if sit == "chair":
         print("you're sitting in a chair!")
+        return True
     elif sit != "chair":
         print("where on earth are you sitting?!")
+        return False
 
 def chair_number(chairs):
     if isinstance(chairs, str):
         print("I don't know what you're talking about")
+        return 0
     elif chairs <= 3:
         print("somebody loves standing")
     elif chairs < 20:
@@ -45,8 +48,9 @@ def chair_number(chairs):
         print("ok, pretty average amount of chairs")
     else:
         print("I forgot what we were talking about.")
+    return chairs
 
-sit_finder(input("where are you sitting?"))
+sit = sit_finder(input("where are you sitting?"))
 
 user_input = input("how many chairs have you sat in?")
 try:
@@ -55,8 +59,12 @@ except ValueError:
     # If the conversion fails, user_input will remain a string
     pass
 
-chair_number(user_input)
+num_chairs = chair_number(user_input)
 
+if num_chairs > 50 and sit:
+    print("you are sitting in a chair, and have sat in more than 50 chairs.")
 
-
+if num_chairs == 420 or 69:
+    print("I see what you did there.")
+    
 # END
