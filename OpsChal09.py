@@ -92,26 +92,42 @@ if num_chairs > 50 and sit:
 if num_chairs == 420 or num_chairs == 69:
     #let them know they've been caught.
     print("I see what you did there.")
-    
+
+#if the number of chairs exceeds 1000    
 if num_chairs > 1000:
+    #setting a variable to hold the method by which the user sat in so many chairs
     yikes = input("how on earth have you sat in so many chairs")
+    #try to see if their input was an integer
     try:
+        # if it is an integer, it will be recognized as such henceforth.
         yikes = int(yikes)
-        # Now that yikes is an integer, we can do further checks or operations
+        #setting variable to hold an explanation
         varibul = input("what are you talking about?")
+        #check to see if their explanation is an integer
         try:
+            #if it is, it shall remain that way
             varibul = int(varibul)
+            #let the user know you don't understand what's happening.
             print("you're insane.")
+        #if int conversion returns valueError(basically, if the input was a string)
         except ValueError:
+            #accept explaination
             print("ok, I see what you mean.")
+    #same deal here, if the input was a string
     except ValueError:
+        #if it is this specific string
         if yikes == "chairs":
+            #diagnose the user
             print("you're insane.")
+        #if it is any other string
         else:
+            #feign suspicion
             print ("sus.")
-    
+#if number of chairs is less than 50 and the user is not sitting in a chair
 if num_chairs <50 and not sit:
+    #go nuts
     print("wowowowowowowowowow")
+    #just trying to fit a pass in here somewhere.
 else:
     pass
 
