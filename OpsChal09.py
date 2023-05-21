@@ -22,49 +22,81 @@
 #chairs, storing the number of chairs the user has sat in as an integer in a variable.
 
 # MAIN
-
+#defining function sit_finder to try to find where you are sitting. It can only verify whether or not the user is sitting in a chair.
 def sit_finder(sit):
-
+#if the user is sitting in a chair
     if sit == "chair":
+        #give them a helpful reminder.
         print("you're sitting in a chair!")
+        #return the value true to be used later.
         return True
+    #else, if they're sitting in something that does not equal a chair
     elif sit != "chair":
+        #despair
         print("where on earth are you sitting?!")
+        #return False value to be used later
         return False
-
+#defining chair_number function to find how many chairs the user has sat in
 def chair_number(chairs):
+    #if they try to say a word instead of a number
     if isinstance(chairs, str):
+        #feign confusion
         print("I don't know what you're talking about")
+        #return a 0 integer to be used when the function is called later.
         return 0
+    #else if they've sat in fewer than 3 chairs
     elif chairs <= 3:
+        #chastise them
         print("somebody loves standing")
+        #if they've sat in fewer than 20 chairs
     elif chairs < 20:
+        #scold them
         print("that's not that many chairs")
+    #if it's greater than 90 chairs
     elif chairs >= 90:
+        #make fun of the user
         print("whoa, ok, slow down chairmaster")
+    #if it's greater than 50 chairs
     elif chairs > 50:
+        #be impressed
         print("whoa, buddy, that's a lot of chairs")
+    #if it's fewer than or equal to 50, unless one of the above conditions has already been met
     elif chairs <= 50:
+        #be unimpressed
         print("ok, pretty average amount of chairs")
+    #otherwise
     else:
+        #forget the topic
         print("I forgot what we were talking about.")
+        #return the integer value given by any of these conditions that is set off to the variable "chairs"
     return chairs
-
+#calling the function within a variable, asking for user input in the argument.
 sit = sit_finder(input("where are you sitting?"))
-
+#storing user input in a variable to be used as an argument when the num_chairs function is called
 user_input = input("how many chairs have you sat in?")
+#if the contents of the user_input variable is a string, attempt to convert it to an integer. 
 try:
     user_input = int(user_input)
 except ValueError:
     # If the conversion fails, user_input will remain a string
     pass
 
+#setting another variable to house the function for use in the following two lines
 num_chairs = chair_number(user_input)
 
+#if they have sat in more than 50 chairs and are currently sitting in a chair
 if num_chairs > 50 and sit:
+    #deliver a helpful reminder.
     print("you are sitting in a chair, and have sat in more than 50 chairs.")
-
+#if the number of chairs they've sat in is equal to 420 or 69
 if num_chairs == 420 or 69:
+    #let them know they've been caught.
     print("I see what you did there.")
+    
+    
+    
+    
+    
+    
     
 # END
