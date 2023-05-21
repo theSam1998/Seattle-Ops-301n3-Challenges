@@ -14,7 +14,7 @@
 #Pursue stretch goals if you are a more advanced user or have remaining lab time.
 #!Create an if statement with two conditions by using and between conditions.
 #!Create an if statement with two conditions by using or between conditions.
-#Create a nested if statement.
+#!Create a nested if statement.
 #Create an if statement that includes pass to avoid errors.
 
 #Variables:
@@ -89,14 +89,30 @@ if num_chairs > 50 and sit:
     #deliver a helpful reminder.
     print("you are sitting in a chair, and have sat in more than 50 chairs.")
 #if the number of chairs they've sat in is equal to 420 or 69
-if num_chairs == 420 or 69:
+if num_chairs == 420 or num_chairs == 69:
     #let them know they've been caught.
     print("I see what you did there.")
     
+if num_chairs > 1000:
+    yikes = input("how on earth have you sat in so many chairs")
+    try:
+        yikes = int(yikes)
+        # Now that yikes is an integer, we can do further checks or operations
+        varibul = input("what are you talking about?")
+        try:
+            varibul = int(varibul)
+            print("you're insane.")
+        except ValueError:
+            print("ok, I see what you mean.")
+    except ValueError:
+        if yikes == "chairs":
+            print("you're insane.")
+        else:
+            print ("sus.")
     
-    
-    
-    
-    
-    
+if num_chairs <50 and not sit:
+    print("wowowowowowowowowow")
+else:
+    pass
+
 # END
