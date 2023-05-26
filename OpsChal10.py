@@ -16,7 +16,8 @@ import os
 
 #Variables:
 document = "textdoc.txt"
-
+document2 = "config.xml"
+renamer = "newconfig.xml"
 # MAIN
 
 
@@ -25,10 +26,14 @@ with open(document, "w") as doc:
     doc.write("testing2\n")
     doc.write("testing3\n")
 with open(document, "r") as doc:
-    print(doc.readlines(1))    
+    print(doc.readline())    
 os.remove(document)
 
-
+#with open(document2, "r") as doc2:
+#    lines = doc2.readlines()
+#lines = lines[:117] + lines[148:]
+#with open(renamer, "w") as doc3:
+#    doc3.writelines(lines)
 
 
 
