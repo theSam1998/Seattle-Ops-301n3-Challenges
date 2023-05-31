@@ -15,13 +15,14 @@
 #Using the requests library, perform a GET request against your lab web server.
 #!For the given header, translate the codes into plain terms that print to the screen; for example, a 404 error should print Site not found to the terminal instead of 404.
 #!For the given URL, print response header information to the screen.
-#Have your script perform authentication into api.github.com using the auth command.
+#!Have your script perform authentication into api.github.com using the auth command.
 #!Add timeouts to your script.
 #!Add error handling to your script.
 
 #Import space:
 import requests
 import time
+from getpass import getpass
 #Mandatory greeting
 print("hello!")
 time.sleep(1)
@@ -90,15 +91,29 @@ status_codes = {
 }
 yes_forms = ["Y", "y", "YES", "yes", "yES", "Yes", "YeS", "yeS", "yEs", "YEs"]
 no_forms = ["N", "n", "NO", "no", "No", "nO"]
+auth_choice = input("Would you like to authenticate into GitHub for this session? (Y/N): ")
+if auth_choice in yes_forms:
+    username = input("Enter your GitHub username: ")
+    password = getpass("Enter your GitHub password: ")
+    with requests.Session() as session:
+        session.auth = (username, password)
+        response = session.get('https://api.github.com/user')
+        print(response)
+else:
+    auth = None
+
 input_var = input("please provide me with a valid URL! I promise not to do anything sketchy with it...")
+
+#MAIN
+
 try:
     input_var = int(input_var)
 except ValueError:
     while True:
         print(" you have the following options: ")
         time.sleep(1)
-        print("\n--------HTTP_METHODS_MENU---------\n", "0----GET\n", "1----POST\n", "2----PUT\n", "3----DELETE\n", "4----HEAD\n", "5----PATCH\n", "6----OPTIONS\n", "7----EXIT\n")
-        choice_var = input("which one would you like to use?")
+        print("\n--------HTTP_METHODS_MENU---------\n", "0----GET\n", "1----POST\n", "2----PUT\n", "3----DELETE\n", "4----HEAD\n", "5----PATCH\n", "6----OPTIONS\n", "7----EXIT\n", "8----NEW URL\n",)
+        choice_var = input("which one would you like to use?: ")
         try:
             choice_var = int(choice_var)
             if choice_var == 0:
@@ -109,7 +124,7 @@ except ValueError:
                         get_response = requests.get(input_var, timeout=3)
                         print("Your http status code is:", get_response)
                         print(status_codes.get(get_response.status_code, 'Unknown status code'))
-                        print("your response header is:", get_response.headers)
+                        print("your response header is:", get_response.headers['content-type'])
                         time.sleep(4)
                         break
                     if procedure_var in no_forms:
@@ -128,7 +143,7 @@ except ValueError:
                         get_response = requests.post(input_var, data=data_dict, timeout=3)
                         print("Your http status code is:", get_response)
                         print(status_codes.get(get_response.status_code, 'Unknown status code'))
-                        print("your response header is:", get_response.headers)
+                        print("your response header is:", get_response.headers['content-type'])
                         time.sleep(4)
                         break
                     if procedure_var in no_forms:
@@ -147,7 +162,7 @@ except ValueError:
                         get_response = requests.put(input_var, data=data_dict, timeout=3)
                         print("Your http status code is:", get_response)
                         print(status_codes.get(get_response.status_code, 'Unknown status code'))
-                        print("your response header is:", get_response.headers)
+                        print("your response header is:", get_response.headers['content-type'])
                         time.sleep(4)
                         break
                     if procedure_var in no_forms:
@@ -163,7 +178,7 @@ except ValueError:
                         get_response = requests.delete(input_var, timeout=3)
                         print("Your http status code is:", get_response)
                         print(status_codes.get(get_response.status_code, 'Unknown status code'))
-                        print("your response header is:", get_response.headers)
+                        print("your response header is:", get_response.headers['content-type'])
                         time.sleep(4)
                         break
                     if procedure_var in no_forms:
@@ -180,7 +195,7 @@ except ValueError:
                         get_response = requests.head(input_var, timeout=3)
                         print("Your http status code is:", get_response)
                         print(status_codes.get(get_response.status_code, 'Unknown status code'))
-                        print("your response header is:", get_response.headers)
+                        print("your response header is:", get_response.headers['content-type'])
                         time.sleep(4)
                         break
                     if procedure_var in no_forms:
@@ -199,7 +214,7 @@ except ValueError:
                         get_response = requests.patch(input_var, data=data_dict, timeout=3)
                         print("Your http status code is:", get_response)
                         print(status_codes.get(get_response.status_code, 'Unknown status code'))
-                        print("your response header is:", get_response.headers)
+                        print("your response header is:", get_response.headers['content-type'])
                         time.sleep(4)
                         break
                     if procedure_var in no_forms:
@@ -215,7 +230,7 @@ except ValueError:
                         get_response = requests.options(input_var, timeout=3)
                         print("Your http status code is:", get_response)
                         print(status_codes.get(get_response.status_code, 'Unknown status code'))
-                        print("your response header is:", get_response.headers)
+                        print("your response header is:", get_response.headers['content-type'])
                         time.sleep(4)
                         break
                     if procedure_var in no_forms:
@@ -228,7 +243,9 @@ except ValueError:
                 print("goodbye!")
                 time.sleep(1)
                 break
-            elif choice_var > 7: 
+            elif choice_var == 8:
+                input_var = input("please provide me with a valid URL! I promise not to do anything sketchy with it...")
+            elif choice_var > 8: 
                 print("invalid option selected, please select a valid option")
                 time.sleep(1)
             elif choice_var < 0: 
@@ -237,17 +254,5 @@ except ValueError:
         except ValueError:    
             print("USER ERROR: invalid input provided, ensure everything is correct and try again.")
             time.sleep(3)
-#MAIN
-
-
-
-
-
-
-
-
-
-
-
 
 #END
