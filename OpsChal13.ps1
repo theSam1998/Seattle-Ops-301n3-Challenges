@@ -35,33 +35,79 @@ Import-Module ActiveDirectory
 
 # Function to create a new user
 function NewUser {
-    # [Your code to create a new user goes here]
+
+    $SamAccountName = Read-Host -Prompt 'Enter the SamAccountName'
+    $UserPrincipalName = Read-Host -Prompt 'Enter the UserPrincipalName'
+    $Name = Read-Host -Prompt 'Enter the Name'
+    $GivenName = Read-Host -Prompt 'Enter the GivenName'
+    $Surname = Read-Host -Prompt 'Enter the Surname'
+    $DisplayName = Read-Host -Prompt 'Enter the DisplayName'
+    $Description = Read-Host -Prompt 'Enter the Description'
+    $Title = Read-Host -Prompt 'Enter the Title'
+    $Department = Read-Host -Prompt 'Enter the Department'
+    $Company = Read-Host -Prompt 'Enter the Company'
+    $Office = Read-Host -Prompt 'Enter the Office'
+    $EmailAddress = Read-Host -Prompt 'Enter the EmailAddress'
+    $Password = Read-Host -Prompt 'Enter the Password' -AsSecureString
+
+    # User parameters
+    $userParams = @{
+        SamAccountName = $SamAccountName
+        UserPrincipalName = $UserPrincipalName
+        Name = $Name
+        GivenName = $GivenName
+        Surname = $Surname
+        DisplayName = $DisplayName
+        Description = $Description
+        Title = $Title
+        Department = $Department
+        Company = $Company
+        Office = $Office
+        EmailAddress = $EmailAddress
+        Enabled = $True 
+        AccountPassword = $Password
+        PasswordNeverExpires = $True
+    }
+    New-ADUser @userParams
 }
 
 # Function to create a new group
 function NewGroup {
-    # [Your code to create a new group goes here]
+    $GroupName = Read-Host -Prompt 'Enter the Group Name'
+    $GroupScope = Read-Host -Prompt 'Enter the Group Scope (Global, Universal, DomainLocal)'
+    
+    $groupParams = @{
+        Name = $GroupName
+        GroupScope = $GroupScope
+        PassThru = $True
+    }
+    New-ADGroup @groupParams
+    echo "new group created!"
 }
 
 # Function to create a new OU
 function NewOU {
-    # [Your code to create a new OU goes here]
+    $OUName = Read-Host -Prompt 'Enter the OU Name'
+    $ouParams = @{
+        Name = $OUName
+        PassThru = $True
+    }
 }
 
 # Function to modify a user
-function ModifyUser {
-    # [Your code to modify a user goes here]
-}
+#function ModifyUser {
+    # [WIP]
+#}
 
 # Function to modify a group
-function ModifyGroup {
-    # [Your code to modify a group goes here]
-}
+#function ModifyGroup {
+    # [WIP]
+#}
 
 # Function to modify an OU
-function ModifyOU {
-    # [Your code to modify an OU goes here]
-}
+#function ModifyOU {
+    # [WIP]
+#}
 
 # Menu system
 do {
@@ -69,9 +115,9 @@ do {
     Write-Host "1. Create a new user"
     Write-Host "2. Create a new group"
     Write-Host "3. Create a new OU"
-    Write-Host "4. Modify a user"
-    Write-Host "5. Modify a group"
-    Write-Host "6. Modify an OU"
+    #Write-Host "4. Modify a user"
+    #Write-Host "5. Modify a group"
+    #Write-Host "6. Modify an OU"
     Write-Host "7. Exit"
 
 
@@ -82,9 +128,9 @@ do {
         '1' { NewUser }
         '2' { NewGroup }
         '3' { NewOU }
-        '4' { ModifyUser }
-        '5' { ModifyGroup }
-        '6' { ModifyOU }
+    #    '4' { ModifyUser }
+    #    '5' { ModifyGroup }
+    #    '6' { ModifyOU }
         '7' { break }
         default { Write-Host "Invalid choice, please try again." }
     }
