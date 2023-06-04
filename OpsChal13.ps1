@@ -95,19 +95,41 @@ function NewOU {
 }
 
 # Function to modify a user
-#function ModifyUser {
-    # [WIP]
-#}
+function ModifyUser {
+    $SamAccountName = Read-Host -Prompt 'Enter the SamAccountName to modify'
+    $UserPrincipalName = Read-Host -Prompt 'Enter the new UserPrincipalName'
+    $DisplayName = Read-Host -Prompt 'Enter the new DisplayName'
+    
+    $userParams = @{
+        UserPrincipalName = $UserPrincipalName
+        DisplayName = $DisplayName
+    }
+    Set-ADUser -Identity $SamAccountName @userParams
+    echo "User modified!"
+}
 
 # Function to modify a group
-#function ModifyGroup {
-    # [WIP]
-#}
+function ModifyGroup {
+    #$GroupName = Read-Host -Prompt 'Enter the Group Name to modify'
+    $NewGroupName = Read-Host -Prompt 'Enter the new Group Name'
+    $NewGroupScope = Read-Host -Prompt 'Enter the new Group Scope (Global, Universal, DomainLocal)'
+    
+    $groupParams = @{
+        Name = $NewGroupName
+        GroupScope = $NewGroupScope
+    }
+    Set-ADGroup -Identity $GroupName @groupParams
+    echo "Group modified!"
+}
 
 # Function to modify an OU
-#function ModifyOU {
-    # [WIP]
-#}
+function ModifyOU {
+    $OUName = Read-Host -Prompt 'Enter the OU Name to modify'
+    $NewOUName = Read-Host -Prompt 'Enter the new OU Name'
+    
+    Set-ADOrganizationalUnit -Identity $OUName -Name $NewOUName
+    echo "OU modified!"
+}
 
 # Menu system
 do {
@@ -115,9 +137,9 @@ do {
     Write-Host "1. Create a new user"
     Write-Host "2. Create a new group"
     Write-Host "3. Create a new OU"
-    #Write-Host "4. Modify a user"
-    #Write-Host "5. Modify a group"
-    #Write-Host "6. Modify an OU"
+    Write-Host "4. Modify a user"
+    Write-Host "5. Modify a group"
+    Write-Host "6. Modify an OU"
     Write-Host "7. Exit"
 
 
@@ -128,9 +150,9 @@ do {
         '1' { NewUser }
         '2' { NewGroup }
         '3' { NewOU }
-    #    '4' { ModifyUser }
-    #    '5' { ModifyGroup }
-    #    '6' { ModifyOU }
+        '4' { ModifyUser }
+        '5' { ModifyGroup }
+        '6' { ModifyOU }
         '7' { break }
         default { Write-Host "Invalid choice, please try again." }
     }
