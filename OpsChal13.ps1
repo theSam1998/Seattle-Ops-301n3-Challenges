@@ -134,8 +134,14 @@ function ModifyOU {
 function ModifyPassword {
     $SamAccountName = Read-Host -Prompt 'Enter the SamAccountName of the account you want to change the password for'
     $newPassword = Read-Host -Prompt 'Enter the new password' -AsSecureString
-    Set-ADAccountPassword -Identity $SamAccountName -NewPassword $newPassword -Reset
-    Write-Host "Password changed successfully!"
+    $newPasswordConf = Read-Host -Prompt 'Confirm the new password' -AsSecureString
+    if ($newPassword -eq $newPasswordConf) {
+        Set-ADAccountPassword -Identity $SamAccountName -NewPassword $newPassword -Reset
+        Write-Host "Password changed successfully!"
+    }
+    else {
+        Write-Host "Passwords do not match, please try again"
+    }
 }
 # Menu system
 do {
