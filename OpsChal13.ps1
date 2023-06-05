@@ -131,6 +131,12 @@ function ModifyOU {
     echo "OU modified!"
 }
 
+function ModifyPassword {
+    $SamAccountName = Read-Host -Prompt 'Enter the SamAccountName of the account you want to change the password for'
+    $newPassword = Read-Host -Prompt 'Enter the new password' -AsSecureString
+    Set-ADAccountPassword -Identity $SamAccountName -NewPassword $newPassword -Reset
+    Write-Host "Password changed successfully!"
+}
 # Menu system
 do {
     # Display the menu
@@ -140,8 +146,8 @@ do {
     Write-Host "4. Modify a user"
     Write-Host "5. Modify a group"
     Write-Host "6. Modify an OU"
-    Write-Host "7. Exit"
-
+    Write-Host "7. Change a password"
+    Write-Host "8. Exit"
 
     $choice = Read-Host "Enter your choice"
 
@@ -153,7 +159,8 @@ do {
         '4' { ModifyUser }
         '5' { ModifyGroup }
         '6' { ModifyOU }
-        '7' { break }
+        '7' { ModifyPassword }
+        '8' { return }
         default { Write-Host "Invalid choice, please try again." }
     }
 } while ($true)
