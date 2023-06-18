@@ -152,7 +152,8 @@ function ShowHelp {
     echo "8. Add user to group"
     echo "9. Remove user"
     echo "10. List users"
-    echo "11. Exit"
+    echo "11. Rename a computer"
+    echo "12. Exit"
 }
 #function [assign static ip to server] {}
 #function [assign dns to server] {}
