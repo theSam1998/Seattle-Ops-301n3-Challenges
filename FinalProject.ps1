@@ -180,7 +180,14 @@ function RenameDevice {
         Write-Host "Computer renamed and configured as a domain controller. Restart is now required"
         Restart-Computer -Wait
     }
+    else {
+        # Rename the computer
+        Rename-Computer -ComputerName $ComputerName -NewName $NewName -Force -Restart
+        Write-Host "Computer renamed. Restart is now required"
+        Restart-Computer -Wait
+    }
 }
+
 
 #function [install AD DS] {}
 #function [create forest] {}
@@ -202,7 +209,8 @@ do {
     '8' { AddUserToGroup }
     '9' { RemoveUser }
     '10' { ListUsers }
-    '11' { return }
+    '11' { RenameDevice }
+    '12' { return }
     default { Write-Host "Invalid choice, please try again." }
     }
    } while ($true)
