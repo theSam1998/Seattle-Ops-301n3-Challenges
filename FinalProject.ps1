@@ -278,7 +278,7 @@ function NewBunchU {
             }
         
            
-        "CEO" = @{
+        "CEO1" = @{
             "Name" = "Nathan Drake"
             "Group" = "Executive Leadership"
             "Department" = "Executive Office"
@@ -286,7 +286,7 @@ function NewBunchU {
             "samAccountName" = "ndrake"
             "Email" = "ndrake@VerveTech.com"
         }
-        "CTO" = @{
+        "CTO1" = @{
             "Name" = "Gordon Freeman"
             "Group" = "Technology Leadership"
             "Department" = "Information Technology"
@@ -294,7 +294,7 @@ function NewBunchU {
             "samAccountName" = "gfreeman"
             "Email" = "gfreeman@VerveTech.com"
         }
-        "CFO" = @{
+        "CFO1" = @{
             "Name" = "Agent 47"
             "Group" = "Finance Leadership"
             "Department" = "Finance"
@@ -302,7 +302,7 @@ function NewBunchU {
             "samAccountName" = "a47"
             "Email" = "a47@VerveTech.com"
         }
-        "COO" = @{
+        "COO1" = @{
             "Name" = "Arthur Morgan"
             "Group" = "Operations Leadership"
             "Department" = "Operations"
@@ -310,7 +310,7 @@ function NewBunchU {
             "samAccountName" = "amorgan"
             "Email" = "amorgan@VerveTech.com"
         }
-        "VP of Sales" = @{
+        "VP of Sales1" = @{
             "Name" = "Nathan Hale"
             "Group" = "Sales"
             "Department" = "Sales"
@@ -318,7 +318,7 @@ function NewBunchU {
             "samAccountName" = "nhale"
             "Email" = "nhale@VerveTech.com"
         }
-        "VP of Marketing" = @{
+        "VP of Marketing1" = @{
             "Name" = "Faith Connors"
             "Group" = "Marketing"
             "Department" = "Marketing"
@@ -326,7 +326,7 @@ function NewBunchU {
             "samAccountName" = "fconnors"
             "Email" = "fconnors@VerveTech.com"
         }
-        "HR Manager" = @{
+        "HR Manager1" = @{
             "Name" = "Doom Guy"
             "Group" = "Human Resources"
             "Department" = "Human Resources"
@@ -334,7 +334,7 @@ function NewBunchU {
             "samAccountName" = "dguy"
             "Email" = "dguy@VerveTech.com"
         }
-        "IT Manager" = @{
+        "IT Manager1" = @{
             "Name" = "Alex Mercer"
             "Group" = "IT Management"
             "Department" = "Information Technology"
@@ -344,29 +344,29 @@ function NewBunchU {
         }
     }
 
+     # Convert the plain text password to a SecureString
+ $securePassword = ConvertTo-SecureString "DefaultPassword123" -AsPlainText -Force
+
     # Add users to Active Directory
     foreach ($user in $users.GetEnumerator()) {
-        $name = $user.Value.Name
-        $group = $user.Value.Group
-        $department = $user.Value.Department
-        $ou = $user.Value.OU
-        $samAccountName = $user.Value.samAccountName
-        $email = $user.Value.Email
-
-        $properties = @{
-            'SamAccountName' = $samAccountName
-            'Name' = $name
-            'OtherAttributes' = @{
-                'title' = $group
-                'mail' = $email
-            }
+    $name = $user.Value.Name
+    $group = $user.Value.Group
+    $department = $user.Value.Department
+    $ou = $user.Value.OU
+    $samAccountName = $user.Value.samAccountName
+    $email = $user.Value.Email
+    $properties = @{
+        'SamAccountName' = $samAccountName
+        'Name' = $name
+        'OtherAttributes' = @{
+        'title' = $group
+        'mail' = $email
         }
     }
-    # To a create user in the Active Directory
-    New-ADUser @properties -UserPassword "DefaultPassword123" -ChangePasswordAtLogon $true -PassThru | Enable-ADAccount
-
+    # To create a user in the Active Directory
+    New-ADUser @properties -AccountPassword $securePassword -ChangePasswordAtLogon $true -PassThru | Enable-ADAccount
+    }
 }
-
 
 
 
