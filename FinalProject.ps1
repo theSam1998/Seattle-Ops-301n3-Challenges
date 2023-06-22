@@ -204,6 +204,80 @@ function NewBunchU {
     # Script purpose: Script that will create new users to the org
     # Define user details
     $users = @{
+            "CEO" = @{
+            "Name" = "Mario Mario"
+            "Group" = "Executive Leadership"
+            "Department" = "Executive Office"
+            "OU" = "Leadership"
+            "samAccountName" = "mmario"
+            "Email" = "mmario@HarmoniTech.com"
+            }
+            "CTO" = @{
+            "Name" = "Master Chief"
+            "Group" = "Technology Leadership"
+            "Department" = "Information Technology"
+            "OU" = "Leadership"
+            "samAccountName" = "mchief"
+            "Email" = "mchief@HarmoniTech.com"
+            }
+            "CIO" = @{
+            "Name" = "Jill Valentine"
+            "Group" = "Technology Leadership"
+            "Department" = "Information Technology"
+            "OU" = "Leadership"
+            "samAccountName" = "jvalentine"
+            "Email" = "jvalentine@HarmoniTech.com"
+            }
+            "COO" = @{
+            "Name" = "Lara Croft"
+            "Group" = "Operations Leadership"
+            "Department" = "Operations"
+            "OU" = "Leadership"
+            "samAccountName" = "lcroft"
+            "Email" = "lcroft@HarmoniTech.com"
+            }
+            "Chief Architect" = @{
+            "Name" = "Samus Aran"
+            "Group" = "Technology Leadership"
+            "Department" = "Information Technology"
+            "OU" = "Leadership"
+            "samAccountName" = "saran"
+            "Email" = "saran@HarmoniTech.com"
+            }
+            "Director of Software Development" = @{
+            "Name" = "Aloy"
+            "Group" = "Software Development"
+            "Department" = "Information Technology"
+            "OU" = "Departments"
+            "samAccountName" = "aloy"
+            "Email" = "aloy@HarmoniTech.com"
+            }
+            "Director of Network Operations" = @{
+            "Name" = "Ryu"
+            "Group" = "Network Operations"
+            "Department" = "Information Technology"
+            "OU" = "Departments"
+            "samAccountName" = "ryu"
+            "Email" = "ryu@HarmoniTech.com"
+            }
+            "Director of Data Analytics" = @{
+            "Name" = "Ezio Auditore"
+            "Group" = "Data Analytics"
+            "Department" = "Information Technology"
+            "OU" = "Departments"
+            "samAccountName" = "ezioauditore"
+            "Email" = "ezioauditore@HarmoniTech.com"
+            }
+            "Director of User Experience" = @{
+            "Name" = "Princess Peach"
+            "Group" = "User Experience"
+            "Department" = "Design"
+            "OU" = "Departments"
+            "samAccountName" = "princesspeach"
+            "Email" = "princesspeach@HarmoniTech.com"
+            }
+        
+           
         "CEO" = @{
             "Name" = "Nathan Drake"
             "Group" = "Executive Leadership"
@@ -289,7 +363,8 @@ function NewBunchU {
         }
     }
     # To a create user in the Active Directory
-    New-ADUser @properties -Enabled $true -ChangePassword
+    New-ADUser @properties -UserPassword "DefaultPassword123" -ChangePasswordAtLogon $true -PassThru | Enable-ADAccount
+
 }
 
 
