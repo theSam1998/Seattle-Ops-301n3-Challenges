@@ -154,9 +154,11 @@ function ShowHelp {
     echo "10. List users"
     echo "11. Rename a computer"
     echo "12. Populate AD users"
-    echo "13. Exit"
+    echo "13. Create a new Forest"
+    echo "14. set a static IP"
+    echo "15. Exit"
 }
-#function [assign static ip to server] {}
+
 #function [assign dns to server] {}
 function RenameDevice {
     $ComputerName = Read-Host -Prompt 'Enter the computer name'
@@ -368,12 +370,115 @@ function NewBunchU {
     }
 }
 
+function NewADForest {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$DomainName,
+
+        [Parameter(Mandatory = $true)]
+        [string]$DomainNetBIOSName
+    )
+
+    # Prompt the user for the Safe Mode Administrator Password
+    $DSRMPassword = Read-Host "Enter the Safe Mode Administrator Password" -AsSecureString
+
+    try {
+        # Install Active Directory Domain Services role
+        Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools -Verbose
+
+        # Promote the server to a domain controller
+        Install-ADDSForest -CreateDnsDelegation:$false `
+                            -DatabasePath "C:\Windows\NTDS" `
+                            -DomainMode "Win2019" `
+                            -DomainName $DomainName `
+                            -DomainNetbiosName $DomainNetBIOSName `
+                            -ForestMode "Win2019" `
+                            -InstallDns:$true `
+                            -LogPath "C:\Windows\NTDS" `
+                            -NoRebootOnCompletion:$true `
+                            -SysvolPath "C:\Windows\SYSVOL" `
+                            -Force:$true `
+                            -SafeModeAdministratorPassword $DSRMPassword `
+                            -Verbose
+    } 
+    catch {
+        Write-Error "An error occurred while setting up the AD Forest: $_"
+        return
+    }
+
+    # Creating a Scheduled Task to run after the restart
+    $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "C:\path\to\post-restart-script.ps1"
+    $trigger = New-ScheduledTaskTrigger -AtStartup
+    $settings = New-ScheduledTaskSettingsSet -RestartInterval (New-TimeSpan -Minutes 1) -RestartCount 3
+
+    Register-ScheduledTask -TaskName "PostRestartTask" -Action $action -Trigger $trigger -Settings $settings -Description "Runs post-restart actions"
+
+    # Confirm before restarting
+    $confirmation = Read-Host "Are you sure you want to restart the computer? (Y/N)"
+    if ($confirmation -eq 'Y') {
+        # Restart the server to complete the promotion
+        Restart-Computer -Force
+    }
+    else {
+        Write-Host "The computer will not be restarted."
+    }
+}
+
+
+function Set-StaticIP {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$AdapterName,
+
+        [Parameter(Mandatory = $true)]
+        [string]$IPAddress,
+
+        [Parameter(Mandatory = $true)]
+        [int]$PrefixLength,
+
+        [Parameter(Mandatory = $false)]
+        [string]$DefaultGateway
+    )
+
+    # Check if the IP Address and Default Gateway are valid
+    if(-not ([System.Net.IPAddress]::TryParse($IPAddress, [ref]0))) {
+        Write-Error "The IP address $IPAddress is not valid."
+        return
+    }
+
+    if($DefaultGateway -and -not ([System.Net.IPAddress]::TryParse($DefaultGateway, [ref]0))) {
+        Write-Error "The default gateway $DefaultGateway is not valid."
+        return
+    }
+
+    # Get the network adapter
+    $adapter = Get-NetAdapter | Where-Object { $_.Name -eq $AdapterName }
+
+    if($null -eq $adapter) {
+        Write-Error "Network adapter '$AdapterName' not found."
+        return
+    }
+
+    # Disable DHCP
+    $adapter | Get-NetIPInterface | Where-Object { $_.InterfaceAlias -eq $AdapterName } | Set-NetIPInterface -DHCP Disabled
+
+    # Set the static IP address
+    try {
+        $adapter | New-NetIPAddress -IPAddress $IPAddress -PrefixLength $PrefixLength -DefaultGateway $DefaultGateway -ErrorAction Stop
+    } 
+    catch {
+        Write-Error "Failed to set the IP address: $_"
+        return
+    }
+
+    # Verify the configuration
+    $adapter | Get-NetIPConfiguration | Select-Object InterfaceAlias, IPv4Address, IPv4DefaultGateway
+}
 
 
 #function [install AD DS] {}
-#function [create forest] {}
 #function [Add multiple OUs] {}
-#function [Add multiple users] {}
 #function [add multiple groups]
 # Menu system
 do {
@@ -392,7 +497,9 @@ do {
     '10' { ListUsers }
     '11' { RenameDevice }
     '12' { NewBunchU }
-    '13' { return }
+    '13' { NewADForest -DomainName "harmonitech" -DomainNetBIOSName "HARMONITECH" }
+    '14' { Set-StaticIP -AdapterName "Ethernet" -IPAddress "192.168.1.100" -PrefixLength 24 -DefaultGateway "192.168.1.1" }
+    '15' { return }
     default { Write-Host "Invalid choice, please try again." }
     }
    } while ($true)
