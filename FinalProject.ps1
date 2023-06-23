@@ -107,7 +107,8 @@ function ModifyOU {
     
     Set-ADOrganizationalUnit -Identity $OUName -Name $NewOUName
     echo "OU modified!"
-   }
+}
+
 
 function ModifyPassword {
     $SamAccountName = Read-Host -Prompt 'Enter the SamAccountName of the account you want to change the password for'
@@ -115,6 +116,8 @@ function ModifyPassword {
     Set-ADAccountPassword -Identity $SamAccountName -NewPassword $newPassword -Reset
     Write-Host "Password changed successfully!"
 }
+
+
 function AddUserToGroup {
     $UserName = Read-Host -Prompt 'Enter the SamAccountName of the user'
     $GroupName = Read-Host -Prompt 'Enter the name of the group'
@@ -125,6 +128,8 @@ function AddUserToGroup {
     echo "Error adding user to group: $_"
     }
 }
+
+
 function RemoveUser {
     $UserName = Read-Host -Prompt 'Enter the SamAccountName of the user to remove'
     try {
@@ -134,6 +139,8 @@ function RemoveUser {
     echo "Error removing user: $_"
     }
 }
+
+
 function ListUsers {
     try {
     Get-ADUser -Filter * | Format-Table SamAccountName, Name
@@ -141,6 +148,8 @@ function ListUsers {
     echo "Error listing users: $_"
     }
 }
+
+
 function ShowHelp {
     echo "1. Create a new user"
     echo "2. Create a new group"
@@ -201,184 +210,45 @@ function RenameDevice {
     }
 }
 
-function NewBunchU {
-    # Author: Osaremeh Abel
-    # Script purpose: Script that will create new users to the org
-    # Define user details
-    $users = @{
-            "CEO" = @{
-            "Name" = "Mario Mario"
-            "Group" = "Executive Leadership"
-            "Department" = "Executive Office"
-            "OU" = "Leadership"
-            "samAccountName" = "mmario"
-            "Email" = "mmario@HarmoniTech.com"
-            }
-            "CTO" = @{
-            "Name" = "Master Chief"
-            "Group" = "Technology Leadership"
-            "Department" = "Information Technology"
-            "OU" = "Leadership"
-            "samAccountName" = "mchief"
-            "Email" = "mchief@HarmoniTech.com"
-            }
-            "CIO" = @{
-            "Name" = "Jill Valentine"
-            "Group" = "Technology Leadership"
-            "Department" = "Information Technology"
-            "OU" = "Leadership"
-            "samAccountName" = "jvalentine"
-            "Email" = "jvalentine@HarmoniTech.com"
-            }
-            "COO" = @{
-            "Name" = "Lara Croft"
-            "Group" = "Operations Leadership"
-            "Department" = "Operations"
-            "OU" = "Leadership"
-            "samAccountName" = "lcroft"
-            "Email" = "lcroft@HarmoniTech.com"
-            }
-            "Chief Architect" = @{
-            "Name" = "Samus Aran"
-            "Group" = "Technology Leadership"
-            "Department" = "Information Technology"
-            "OU" = "Leadership"
-            "samAccountName" = "saran"
-            "Email" = "saran@HarmoniTech.com"
-            }
-            "Director of Software Development" = @{
-            "Name" = "Aloy"
-            "Group" = "Software Development"
-            "Department" = "Information Technology"
-            "OU" = "Departments"
-            "samAccountName" = "aloy"
-            "Email" = "aloy@HarmoniTech.com"
-            }
-            "Director of Network Operations" = @{
-            "Name" = "Ryu"
-            "Group" = "Network Operations"
-            "Department" = "Information Technology"
-            "OU" = "Departments"
-            "samAccountName" = "ryu"
-            "Email" = "ryu@HarmoniTech.com"
-            }
-            "Director of Data Analytics" = @{
-            "Name" = "Ezio Auditore"
-            "Group" = "Data Analytics"
-            "Department" = "Information Technology"
-            "OU" = "Departments"
-            "samAccountName" = "ezioauditore"
-            "Email" = "ezioauditore@HarmoniTech.com"
-            }
-            "Director of User Experience" = @{
-            "Name" = "Princess Peach"
-            "Group" = "User Experience"
-            "Department" = "Design"
-            "OU" = "Departments"
-            "samAccountName" = "princesspeach"
-            "Email" = "princesspeach@HarmoniTech.com"
-            }
-        
-           
-        "CEO1" = @{
-            "Name" = "Nathan Drake"
-            "Group" = "Executive Leadership"
-            "Department" = "Executive Office"
-            "OU" = "Leadership"
-            "samAccountName" = "ndrake"
-            "Email" = "ndrake@VerveTech.com"
-        }
-        "CTO1" = @{
-            "Name" = "Gordon Freeman"
-            "Group" = "Technology Leadership"
-            "Department" = "Information Technology"
-            "OU" = "Leadership"
-            "samAccountName" = "gfreeman"
-            "Email" = "gfreeman@VerveTech.com"
-        }
-        "CFO1" = @{
-            "Name" = "Agent 47"
-            "Group" = "Finance Leadership"
-            "Department" = "Finance"
-            "OU" = "Leadership"
-            "samAccountName" = "a47"
-            "Email" = "a47@VerveTech.com"
-        }
-        "COO1" = @{
-            "Name" = "Arthur Morgan"
-            "Group" = "Operations Leadership"
-            "Department" = "Operations"
-            "OU" = "Leadership"
-            "samAccountName" = "amorgan"
-            "Email" = "amorgan@VerveTech.com"
-        }
-        "VP of Sales1" = @{
-            "Name" = "Nathan Hale"
-            "Group" = "Sales"
-            "Department" = "Sales"
-            "OU" = "Departments"
-            "samAccountName" = "nhale"
-            "Email" = "nhale@VerveTech.com"
-        }
-        "VP of Marketing1" = @{
-            "Name" = "Faith Connors"
-            "Group" = "Marketing"
-            "Department" = "Marketing"
-            "OU" = "Departments"
-            "samAccountName" = "fconnors"
-            "Email" = "fconnors@VerveTech.com"
-        }
-        "HR Manager1" = @{
-            "Name" = "Doom Guy"
-            "Group" = "Human Resources"
-            "Department" = "Human Resources"
-            "OU" = "Departments"
-            "samAccountName" = "dguy"
-            "Email" = "dguy@VerveTech.com"
-        }
-        "IT Manager1" = @{
-            "Name" = "Alex Mercer"
-            "Group" = "IT Management"
-            "Department" = "Information Technology"
-            "OU" = "Departments"
-            "samAccountName" = "amercer"
-            "Email" = "amercer@VerveTech.com"
-        }
-    }
 
-     # Convert the plain text password to a SecureString
- $securePassword = ConvertTo-SecureString "DefaultPassword123" -AsPlainText -Force
+function NewBunchU {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$CsvFilePath
+    )
+
+    # Import user data from CSV file
+    $users = Import-Csv -Path $CsvFilePath
+
+    # Convert the plain text password to a SecureString
+    $securePassword = ConvertTo-SecureString "DefaultPassword123" -AsPlainText -Force
 
     # Add users to Active Directory
-    foreach ($user in $users.GetEnumerator()) {
-    $name = $user.Value.Name
-    $group = $user.Value.Group
-    $department = $user.Value.Department
-    $ou = $user.Value.OU
-    $samAccountName = $user.Value.samAccountName
-    $email = $user.Value.Email
-    $properties = @{
-        'SamAccountName' = $samAccountName
-        'Name' = $name
-        'OtherAttributes' = @{
-        'title' = $group
-        'mail' = $email
+    foreach ($user in $users) {
+        $properties = @{
+            'SamAccountName' = $user.samAccountName
+            'Name' = $user.Name
+            'OtherAttributes' = @{
+                'title' = $user.Group
+                'mail' = $user.Email
+            }
         }
-    }
-    # To create a user in the Active Directory
-    New-ADUser @properties -AccountPassword $securePassword -ChangePasswordAtLogon $true -PassThru | Enable-ADAccount
+
+        # To create a user in the Active Directory
+        New-ADUser @properties -AccountPassword $securePassword -ChangePasswordAtLogon $true -PassThru | Enable-ADAccount
     }
 }
+
 
 function NewADForest {
     param(
         [Parameter(Mandatory = $true)]
         [string]$DomainName,
-
         [Parameter(Mandatory = $true)]
-        [string]$DomainNetBIOSName
+        [string]$DomainNetBIOSName,
+        [Parameter(Mandatory = $true)]
+        [SecureString]$DSRMPassword
     )
-
     # Prompt the user for the Safe Mode Administrator Password
     $DSRMPassword = Read-Host "Enter the Safe Mode Administrator Password" -AsSecureString
 
@@ -426,21 +296,16 @@ function NewADForest {
 
 
 function Set-StaticIP {
-    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [string]$AdapterName,
-
         [Parameter(Mandatory = $true)]
         [string]$IPAddress,
-
         [Parameter(Mandatory = $true)]
         [int]$PrefixLength,
-
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [string]$DefaultGateway
     )
-
     # Check if the IP Address and Default Gateway are valid
     if(-not ([System.Net.IPAddress]::TryParse($IPAddress, [ref]0))) {
         Write-Error "The IP address $IPAddress is not valid."
