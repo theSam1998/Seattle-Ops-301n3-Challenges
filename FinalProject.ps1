@@ -249,49 +249,22 @@ function NewADForest {
         [Parameter(Mandatory = $true)]
         [SecureString]$DSRMPassword
     )
-    # Prompt the user for the Safe Mode Administrator Password
-    $DSRMPassword = Read-Host "Enter the Safe Mode Administrator Password" -AsSecureString
 
-    try {
-        # Install Active Directory Domain Services role
-        Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools -Verbose
-
-        # Promote the server to a domain controller
-        Install-ADDSForest -CreateDnsDelegation:$false `
-                            -DatabasePath "C:\Windows\NTDS" `
-                            -DomainMode "Win2019" `
-                            -DomainName $DomainName `
-                            -DomainNetbiosName $DomainNetBIOSName `
-                            -ForestMode "Win2019" `
-                            -InstallDns:$true `
-                            -LogPath "C:\Windows\NTDS" `
-                            -NoRebootOnCompletion:$true `
-                            -SysvolPath "C:\Windows\SYSVOL" `
-                            -Force:$true `
-                            -SafeModeAdministratorPassword $DSRMPassword `
-                            -Verbose
-    } 
-    catch {
-        Write-Error "An error occurred while setting up the AD Forest: $_"
-        return
-    }
-
-    # Creating a Scheduled Task to run after the restart
-    $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "C:\path\to\post-restart-script.ps1"
-    $trigger = New-ScheduledTaskTrigger -AtStartup
-    $settings = New-ScheduledTaskSettingsSet -RestartInterval (New-TimeSpan -Minutes 1) -RestartCount 3
-
-    Register-ScheduledTask -TaskName "PostRestartTask" -Action $action -Trigger $trigger -Settings $settings -Description "Runs post-restart actions"
-
-    # Confirm before restarting
-    $confirmation = Read-Host "Are you sure you want to restart the computer? (Y/N)"
-    if ($confirmation -eq 'Y') {
-        # Restart the server to complete the promotion
-        Restart-Computer -Force
-    }
-    else {
-        Write-Host "The computer will not be restarted."
-    }
+    Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+    Import-Module ADDSDeployment
+    Install-ADDSForest `
+        -CreateDnsDelegation:$false `
+        -DatabasePath "C:\Windows\NTDS" `
+        -DomainMode "WinThreshold" `
+        -DomainName $DomainName `
+        -DomainNetbiosName $DomainNetBIOSName `
+        -ForestMode "WinThreshold" `
+        -InstallDns:$true `
+        -LogPath "C:\Windows\NTDS" `
+        -NoRebootOnCompletion:$false `
+        -SysvolPath "C:\Windows\SYSVOL" `
+        -Force:$true `
+        -SafeModeAdministratorPassword $DSRMPassword
 }
 
 
@@ -306,40 +279,23 @@ function Set-StaticIP {
         [Parameter(Mandatory = $true)]
         [string]$DefaultGateway
     )
-    # Check if the IP Address and Default Gateway are valid
-    if(-not ([System.Net.IPAddress]::TryParse($IPAddress, [ref]0))) {
-        Write-Error "The IP address $IPAddress is not valid."
-        return
-    }
-
-    if($DefaultGateway -and -not ([System.Net.IPAddress]::TryParse($DefaultGateway, [ref]0))) {
-        Write-Error "The default gateway $DefaultGateway is not valid."
-        return
-    }
 
     # Get the network adapter
-    $adapter = Get-NetAdapter | Where-Object { $_.Name -eq $AdapterName }
+    $adapter = Get-NetAdapter -Name $AdapterName
 
-    if($null -eq $adapter) {
-        Write-Error "Network adapter '$AdapterName' not found."
-        return
-    }
+    # Remove existing IP addresses
+    $adapter | Remove-NetIPAddress -Confirm:$false
 
-    # Disable DHCP
-    $adapter | Get-NetIPInterface | Where-Object { $_.InterfaceAlias -eq $AdapterName } | Set-NetIPInterface -DHCP Disabled
+    # Set the new IP address
+    $adapter | New-NetIPAddress -IPAddress $IPAddress -PrefixLength $PrefixLength -DefaultGateway $DefaultGateway
 
-    # Set the static IP address
-    try {
-        $adapter | New-NetIPAddress -IPAddress $IPAddress -PrefixLength $PrefixLength -DefaultGateway $DefaultGateway -ErrorAction Stop
-    } 
-    catch {
-        Write-Error "Failed to set the IP address: $_"
-        return
-    }
+    # Remove existing default gateway
+    $adapter | Remove-NetRoute -DestinationPrefix 0.0.0.0/0 -Confirm:$false
 
-    # Verify the configuration
-    $adapter | Get-NetIPConfiguration | Select-Object InterfaceAlias, IPv4Address, IPv4DefaultGateway
+    # Set the new default gateway
+    $adapter | New-NetRoute -DestinationPrefix 0.0.0.0/0 -NextHop $DefaultGateway
 }
+
 
 
 #function [install AD DS] {}
