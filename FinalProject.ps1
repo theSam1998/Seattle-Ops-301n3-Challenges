@@ -242,30 +242,24 @@ function NewBunchU {
 
 function NewADForest {
     param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory=$true)]
         [string]$DomainName,
-        [Parameter(Mandatory = $true)]
+
+        [Parameter(Mandatory=$true)]
         [string]$DomainNetBIOSName,
-        [Parameter(Mandatory = $true)]
-        [SecureString]$DSRMPassword
+
+        [Parameter(Mandatory=$true)]
+        [System.Security.SecureString]$DSRMPassword
     )
 
-    Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
-    Import-Module ADDSDeployment
     Install-ADDSForest `
-        -CreateDnsDelegation:$false `
-        -DatabasePath "C:\Windows\NTDS" `
-        -DomainMode "WinThreshold" `
         -DomainName $DomainName `
         -DomainNetbiosName $DomainNetBIOSName `
-        -ForestMode "WinThreshold" `
         -InstallDns:$true `
-        -LogPath "C:\Windows\NTDS" `
-        -NoRebootOnCompletion:$false `
-        -SysvolPath "C:\Windows\SYSVOL" `
-        -Force:$true `
-        -SafeModeAdministratorPassword $DSRMPassword
+        -SafeModeAdministratorPassword $DSRMPassword `
+        -Force:$true
 }
+
 
 
 function Set-StaticIP {
