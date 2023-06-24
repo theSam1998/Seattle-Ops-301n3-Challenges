@@ -165,10 +165,12 @@ function ShowHelp {
     echo "12. Populate AD users"
     echo "13. Create a new Forest"
     echo "14. set a static IP"
-    echo "15. Exit"
+    echo "15. Add multiple OUs"
+    echo "16. Add multiple groups"
+    echo "17. Auto Configuration (FRESH INSTANCES ONLY)"
+    echo "18. Exit"
 }
 
-#function [assign dns to server] {}
 function RenameDevice {
     $ComputerName = Read-Host -Prompt 'Enter the computer name'
     $NewName = Read-Host -Prompt 'Enter the new computer name'
@@ -355,8 +357,30 @@ function NewGroupInOU {
 }
 
 
-#function [Add multiple OUs] {}
-#function [add multiple groups]
+function autoconfig {
+    # Create a scheduled task to run this script at startup
+    $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File `"$PSCommandPath`" -TaskRun"
+    $trigger = New-ScheduledTaskTrigger -AtStartup
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DontStopOnIdleEnd
+    $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount
+    Register-ScheduledTask -TaskName "MyScript" -Action $action -Trigger $trigger -Settings $settings -Principal $principal
+
+    # If the -TaskRun switch is present, this is the post-restart run
+    if ($TaskRun) {
+        NewBunchU
+        NewMultipleOUs
+        NewGroupInOU
+        SetStaticIP
+
+        # Delete the scheduled task
+        Unregister-ScheduledTask -TaskName "MyScript" -Confirm:$false
+    } else {
+        # This is the pre-restart run
+        NewADForest -ForestName "harmonitech.com" -DomainName "harmonitech" -DomainNetBIOSName "HARMONITECH" -DSRMPassword "Catatemydog89!"
+        Restart-Computer -Wait
+    }
+}
+
 # Menu system
 do {
     ShowHelp
@@ -378,7 +402,8 @@ do {
     '14' { SetStaticIP }
     '15' { NewMultipleOUs }
     '16' { NewGroupInOU }
-    '17' { return }
+    '17' { autoconfig }
+    '18' { return }
     default { Write-Host "Invalid choice, please try again." }
     }
    } while ($true)
