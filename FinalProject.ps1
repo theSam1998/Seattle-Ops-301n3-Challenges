@@ -240,27 +240,41 @@ function NewBunchU {
 }
 
 
+# Author: Jasmine Garcia
+# Date of latest revision: 6/22/2023
+# Purpose: Create a script that creates an AD Forest
 function NewADForest {
     param(
-        [Parameter(Mandatory=$true)]
-        [string]$DomainName,
-
-        [Parameter(Mandatory=$true)]
-        [string]$DomainNetBIOSName,
-
-        [Parameter(Mandatory=$true)]
-        [System.Security.SecureString]$DSRMPassword
+    [Parameter(Mandatory = $true)]
+    [string]$ForestName,
+    [Parameter(Mandatory = $true)]
+    [string]$DomainName,
+    [Parameter(Mandatory = $true)]
+    [string]$DomainNetBIOSName,
+    [Parameter(Mandatory = $true)]
+    [string]$DSRMPassword
     )
-
-    Install-ADDSForest `
-        -DomainName $DomainName `
-        -DomainNetbiosName $DomainNetBIOSName `
-        -InstallDns:$true `
-        -SafeModeAdministratorPassword $DSRMPassword `
-        -Force:$true
+   
+    # Install Active Directory Domain Services role
+    Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools -Verbose
+    # Promote the server to a domain controller
+    Install-ADDSForest -CreateDnsDelegation:$false `
+    -DatabasePath "C:\\Windows\\NTDS" `
+    -DomainMode "Win2019" `
+    -DomainName $DomainName `
+    -DomainNetbiosName $DomainNetBIOSName `
+    -ForestMode "Win2019" `
+    -InstallDns:$true `
+    -LogPath "C:\\Windows\\NTDS" `
+    -NoRebootOnCompletion:$true `
+    -SysvolPath "C:\\Windows\\SYSVOL" `
+    -Force:$true `
+    -SafeModeAdministratorPassword (ConvertTo-SecureString -String $DSRMPassword -AsPlainText -Force) `
+    -Verbose
+    # Restart the server to complete the promotion
+    Restart-Computer -Force
 }
-
-
+   
 
 function Set-StaticIP {
     param(
@@ -312,7 +326,7 @@ do {
     '10' { ListUsers }
     '11' { RenameDevice }
     '12' { NewBunchU }
-    '13' { NewADForest -DomainName "harmonitech" -DomainNetBIOSName "HARMONITECH" }
+    '13' { NewADForest -ForestName "harmonitech.com" -DomainName "harmonitech" -DomainNetBIOSName "HARMONITECH" -DSRMPassword "Catatemydog89!" }
     '14' { Set-StaticIP -AdapterName "Ethernet" -IPAddress "192.168.1.100" -PrefixLength 24 -DefaultGateway "192.168.1.1" }
     '15' { return }
     default { Write-Host "Invalid choice, please try again." }
