@@ -243,50 +243,52 @@ function NewBunchU {
 # Author: Jasmine Garcia
 # Date of latest revision: 6/22/2023
 # Purpose: Create a script that creates an AD Forest
+# Author: Jasmine Garcia
+# Date of latest revision: 6/22/2023
+# Purpose: Create a script that creates an AD Forest
 function NewADForest {
-    param(
-    [Parameter(Mandatory = $true)]
-    [string]$ForestName,
-    [Parameter(Mandatory = $true)]
-    [string]$DomainName,
-    [Parameter(Mandatory = $true)]
-    [string]$DomainNetBIOSName,
-    [Parameter(Mandatory = $true)]
-    [string]$DSRMPassword
-    )
-   
-    # Install Active Directory Domain Services role
-    Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools -Verbose
-    # Promote the server to a domain controller
-    Install-ADDSForest -CreateDnsDelegation:$false `
-    -DatabasePath "C:\\Windows\\NTDS" `
-    -DomainMode "Win2019" `
-    -DomainName $DomainName `
-    -DomainNetbiosName $DomainNetBIOSName `
-    -ForestMode "Win2019" `
-    -InstallDns:$true `
-    -LogPath "C:\\Windows\\NTDS" `
-    -NoRebootOnCompletion:$true `
-    -SysvolPath "C:\\Windows\\SYSVOL" `
-    -Force:$true `
-    -SafeModeAdministratorPassword (ConvertTo-SecureString -String $DSRMPassword -AsPlainText -Force) `
-    -Verbose
-    # Restart the server to complete the promotion
-    Restart-Computer -Force
+ param(
+ [Parameter(Mandatory = $true)]
+ [string]$ForestName,
+ [Parameter(Mandatory = $true)]
+ [string]$DomainName,
+ [Parameter(Mandatory = $true)]
+ [string]$DomainNetBIOSName,
+ [Parameter(Mandatory = $true)]
+ [string]$DSRMPassword
+ )
+ 
+ # Install Active Directory Domain Services role
+ Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools -Verbose
+ # Promote the server to a domain controller
+ Install-ADDSForest -CreateDnsDelegation:$false `
+ -DatabasePath "C:\Windows\NTDS" `
+ -DomainMode "Win2012" `
+ -DomainName $ForestName `
+ -DomainNetbiosName $DomainNetBIOSName `
+ -ForestMode "Win2012" `
+ -InstallDns:$true `
+ -LogPath "C:\Windows\NTDS" `
+ -NoRebootOnCompletion:$true `
+ -SysvolPath "C:\Windows\SYSVOL" `
+ -Force:$true `
+ -SafeModeAdministratorPassword (ConvertTo-SecureString -String $DSRMPassword -AsPlainText -Force) `
+ -Verbose
+ # Restart the server to complete the promotion
+ Restart-Computer -Force
 }
-   
+# Example usage of the function
 
-function Set-StaticIP {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$AdapterName,
-        [Parameter(Mandatory = $true)]
-        [string]$IPAddress,
-        [Parameter(Mandatory = $true)]
-        [int]$PrefixLength,
-        [Parameter(Mandatory = $true)]
-        [string]$DefaultGateway
-    )
+
+   
+# Author: Osaremeh Abel
+# Script purpose: Script that will assign the Windows server VM a static IPv4 address
+function SetStaticIP {
+    $AdapterName = Read-Host -Prompt 'Enter the Adapter Name'
+    $IPAddress = Read-Host -Prompt 'Enter the IP Address'
+    $PrefixLength = Read-Host -Prompt 'Enter the Prefix Length'
+    $DefaultGateway = Read-Host -Prompt 'Enter the Default Gateway'
+    $DNSServer = Read-Host -Prompt 'Enter the DNS Server'
 
     # Get the network adapter
     $adapter = Get-NetAdapter -Name $AdapterName
@@ -302,11 +304,57 @@ function Set-StaticIP {
 
     # Set the new default gateway
     $adapter | New-NetRoute -DestinationPrefix 0.0.0.0/0 -NextHop $DefaultGateway
+
+    # Set the DNS server
+    $adapter | Set-DnsClientServerAddress -ServerAddresses $DNSServer
+}
+
+function NewMultipleOUs {
+    $OUList = Read-Host -Prompt 'Enter the OU Names (separated by commas)'
+    $OUs = $OUList.Split(',')
+    
+    foreach ($OUName in $OUs) {
+        $OUName = $OUName.Trim()  # Remove any leading or trailing spaces
+        $ouParams = @{
+            Name = $OUName
+            PassThru = $True
+        }
+        try {
+            New-ADOrganizationalUnit @ouParams
+            echo "OU '$OUName' created!"
+        } catch {
+            echo "Error creating OU '$OUName': $_"
+        }
+    }
+}
+
+function NewGroupInOU {
+    $GroupName = Read-Host -Prompt 'Enter the Group Name'
+    $GroupScope = Read-Host -Prompt 'Enter the Group Scope (Global, Universal, DomainLocal)'
+    $OUList = Read-Host -Prompt 'Enter the OUs to assign this group to (separated by commas)'
+    $OUs = $OUList.Split(',')
+    
+    $groupParams = @{
+        Name = $GroupName
+        GroupScope = $GroupScope
+        PassThru = $True
+    }
+    
+    $group = New-ADGroup @groupParams
+    echo "New group '$GroupName' created!"
+    
+    foreach ($OUName in $OUs) {
+        $OUName = $OUName.Trim()  # Remove any leading or trailing spaces
+        try {
+            Move-ADObject -Identity $group.DistinguishedName -TargetPath ("OU=" + $OUName + ",DC=domain,DC=com")
+            echo "Group '$GroupName' assigned to OU '$OUName'!"
+        } catch {
+            echo "Error assigning group '$GroupName' to OU '$OUName': $_"
+        }
+    }
 }
 
 
-
-#function [install AD DS] {}
 #function [Add multiple OUs] {}
 #function [add multiple groups]
 # Menu system
@@ -327,8 +375,10 @@ do {
     '11' { RenameDevice }
     '12' { NewBunchU }
     '13' { NewADForest -ForestName "harmonitech.com" -DomainName "harmonitech" -DomainNetBIOSName "HARMONITECH" -DSRMPassword "Catatemydog89!" }
-    '14' { Set-StaticIP -AdapterName "Ethernet" -IPAddress "192.168.1.100" -PrefixLength 24 -DefaultGateway "192.168.1.1" }
-    '15' { return }
+    '14' { SetStaticIP }
+    '15' { NewMultipleOUs }
+    '16' { NewGroupInOU }
+    '17' { return }
     default { Write-Host "Invalid choice, please try again." }
     }
    } while ($true)
