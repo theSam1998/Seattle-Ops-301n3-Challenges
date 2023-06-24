@@ -277,7 +277,7 @@ function NewADForest {
  -SafeModeAdministratorPassword (ConvertTo-SecureString -String $DSRMPassword -AsPlainText -Force) `
  -Verbose
  # Restart the server to complete the promotion
- Restart-Computer -Force
+ shutdown.exe /r /t 60
 }
 # Example usage of the function
 
@@ -331,39 +331,61 @@ function NewMultipleOUs {
 }
 
 function NewGroupInOU {
-    $GroupName = Read-Host -Prompt 'Enter the Group Name'
-    $GroupScope = Read-Host -Prompt 'Enter the Group Scope (Global, Universal, DomainLocal)'
-    $OUList = Read-Host -Prompt 'Enter the OUs to assign this group to (separated by commas)'
-    $OUs = $OUList.Split(',')
-    
-    $groupParams = @{
-        Name = $GroupName
-        GroupScope = $GroupScope
-        PassThru = $True
-    }
-    
-    $group = New-ADGroup @groupParams
-    echo "New group '$GroupName' created!"
-    
-    foreach ($OUName in $OUs) {
-        $OUName = $OUName.Trim()  # Remove any leading or trailing spaces
-        try {
-            Move-ADObject -Identity $group.DistinguishedName -TargetPath ("OU=" + $OUName + ",DC=domain,DC=com")
-            echo "Group '$GroupName' assigned to OU '$OUName'!"
-        } catch {
-            echo "Error assigning group '$GroupName' to OU '$OUName': $_"
+    $GroupNames = Read-Host -Prompt 'Enter the Group Names (separated by commas)'
+    $GroupNameList = $GroupNames.Split(',')
+
+    foreach ($GroupName in $GroupNameList) {
+        $GroupName = $GroupName.Trim()  # Remove any leading or trailing spaces
+        
+        $GroupScope = Read-Host -Prompt "Enter the Group Scope for '$GroupName' (Global, Universal, DomainLocal)"
+        
+        $OUList = Read-Host -Prompt "Enter the OUs to assign '$GroupName' to (separated by commas)"
+        $OUs = $OUList.Split(',')
+        
+        $UserSAMAccountNames = Read-Host -Prompt "Enter the User SAMAccountNames to add to '$GroupName' (separated by commas, press Enter for none)"
+        $UserSAMAccountNamesList = $UserSAMAccountNames.Split(',')
+        
+        $groupParams = @{
+            Name = $GroupName
+            GroupScope = $GroupScope
+            PassThru = $True
+        }
+        
+        $group = New-ADGroup @groupParams
+        echo "New group '$GroupName' created!"
+        
+        foreach ($OUName in $OUs) {
+            $OUName = $OUName.Trim()  # Remove any leading or trailing spaces
+            try {
+                $groupDN = (Get-ADGroup -Filter "Name -eq '$GroupName'").DistinguishedName
+                Move-ADObject -Identity $groupDN -TargetPath ("OU=$OUName,DC=harmonitech,DC=com")
+                echo "Group '$GroupName' assigned to OU '$OUName'!"
+            } catch {
+                echo "Error assigning group '$GroupName' to OU '$OUName': $_"
+            }
+        }
+        
+        foreach ($UserSAMAccountName in $UserSAMAccountNamesList) {
+            $UserSAMAccountName = $UserSAMAccountName.Trim()  # Remove any leading or trailing spaces
+            try {
+                Add-ADGroupMember -Identity $group.Name -Members $UserSAMAccountName
+                echo "User '$UserSAMAccountName' added to group '$GroupName'!"
+            } catch {
+                echo "Error adding user '$UserSAMAccountName' to group '$GroupName': $_"
+            }
         }
     }
 }
 
 
+
+
+
+
 function autoconfig {
-    # Create a scheduled task to run this script at startup
-    $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File `"$PSCommandPath`" -TaskRun"
-    $trigger = New-ScheduledTaskTrigger -AtStartup
-    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DontStopOnIdleEnd
-    $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount
-    Register-ScheduledTask -TaskName "MyScript" -Action $action -Trigger $trigger -Settings $settings -Principal $principal
+    param (
+        [switch]$TaskRun
+    )
 
     # If the -TaskRun switch is present, this is the post-restart run
     if ($TaskRun) {
@@ -373,13 +395,27 @@ function autoconfig {
         SetStaticIP
 
         # Delete the scheduled task
-        Unregister-ScheduledTask -TaskName "MyScript" -Confirm:$false
+        schtasks.exe /Delete /TN "MyScript" /F
     } else {
         # This is the pre-restart run
+        # Create a scheduled task to run this script at startup with -TaskRun switch
+        $scriptPath = $PSCommandPath
+        $taskCommand = "powershell.exe -WindowStyle Normal -File `"$scriptPath`" -TaskRun"
+        $taskArguments = "-Create -TN `"MyScript`" -SC ONSTART -TR `"$taskCommand`""
+        Start-Process schtasks.exe -ArgumentList $taskArguments -Wait -NoNewWindow
+
         NewADForest -ForestName "harmonitech.com" -DomainName "harmonitech" -DomainNetBIOSName "HARMONITECH" -DSRMPassword "Catatemydog89!"
-        Restart-Computer -Wait
+        #shutdown.exe /r /t 60
     }
 }
+
+
+
+
+
+
+
+
 
 # Menu system
 do {
