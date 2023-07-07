@@ -5,6 +5,16 @@ Import-Module ActiveDirectory
 #Global variables: 
 
 # MAIN
+$os = Get-CimInstance -ClassName Win32_OperatingSystem
+$lastBootTime = $os.LastBootUpTime
+$currentTime = Get-Date
+$diff = $currentTime - $lastBootTime
+if ($diff.TotalMinutes -lt 5) {
+    $TaskRun = $true
+}
+
+
+
 # Function to create a new user
 function NewUser {
 
@@ -383,20 +393,24 @@ function NewGroupInOU {
 
 
 function autoconfig {
-    param (
-        [switch]$TaskRun
-    )
-
     # If the -TaskRun switch is present, this is the post-restart run
     if ($TaskRun) {
-        NewBunchU
-        NewMultipleOUs
-        NewGroupInOU
-        SetStaticIP
+        $userInput = Read-Host "This script is running in post-restart autoconfig mode, do you want to proceed with the current settings? Y/n"
+        if ($userInput -eq 'y' -or $userInput -eq 'Y') {
+            NewBunchU
+            NewMultipleOUs
+            NewGroupInOU
+            SetStaticIP
 
-        # Delete the scheduled task
-        schtasks.exe /Delete /TN "MyScript" /F
-    } else {
+            # Delete the scheduled task
+            schtasks.exe /Delete /TN "MyScript" /F
+        } 
+        else {
+            $TaskRun = $false
+            return
+        }
+    } 
+    else {
         # This is the pre-restart run
         # Create a scheduled task to run this script at startup with -TaskRun switch
         $scriptPath = $PSCommandPath
@@ -408,6 +422,7 @@ function autoconfig {
         #shutdown.exe /r /t 60
     }
 }
+
 
 
 
